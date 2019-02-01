@@ -1,0 +1,12 @@
+<app-loader *ngIf="loading"></app-loader>
+
+<h3>Criar Paciente</h3>
+<form >
+    <mat-form-field>
+        <input matInput placeholder="Nome do paciente" [formControl]="nomePacienteFormControl" [errorStateMatcher]="matcher">
+        <mat-error *ngIf="nomePacienteFormControl.hasError('required')">
+            Campo obrigatório
+        </mat-error>
+    </mat-form-field>
+    <button mat-button [disabled]="nomePacienteFormControl.hasError('required')" (click)="salvar()">Salvar</button>
+</form>

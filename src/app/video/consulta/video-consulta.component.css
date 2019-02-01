@@ -1,0 +1,18 @@
+table {
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+.mat-column-path {
+    flex: 0 0 600px;
+}
+mat-select {
+    width: 20%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#dynamicTimeWarpincDistance{
+    margin-left: 100px;
+}
+

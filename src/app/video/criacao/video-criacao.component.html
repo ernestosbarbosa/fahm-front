@@ -1,0 +1,25 @@
+<app-loader *ngIf="loading"></app-loader>
+
+<h3>Upload de Vídeo</h3>
+
+<form>
+  <mat-form-field>
+    <input type="text" placeholder="Paciente" matInput [formControl]="paciente" [matAutocomplete]="auto" [errorStateMatcher]="matcher" (blur)="validateSelection($event.target.value)">
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+      <mat-option *ngFor="let p of filteredPacientes | async" [value]="p">
+        {{p.name}}
+      </mat-option>
+    </mat-autocomplete>
+    <mat-error *ngIf="paciente.hasError('required')">
+      Campo obrigatório
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput [matDatepicker]="picker" placeholder="Data" [formControl]="date" [disabled]="paciente.hasError('required')">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  
+  <input type="file" accept="video/mp4" [disabled]="paciente.hasError('required') || !date" (change)="handleFileInput($event.target.files)">
+  <button mat-button (click)="upload()" [disabled]="paciente.hasError('required') || !date || !fileToUpload">Enviar</button>
+</form>

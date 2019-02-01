@@ -1,0 +1,92 @@
+<app-loader *ngIf="loading"></app-loader>
+
+<h3>Vídeos por paciente</h3>
+
+<form>
+  <mat-form-field>
+    <input type="text" placeholder="Paciente" matInput [formControl]="paciente" [matAutocomplete]="auto"
+      [errorStateMatcher]="matcher" (blur)="validateSelection($event.target.value)">
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+      <mat-option *ngFor="let p of filteredPacientes | async" [value]="p">
+        {{p.name}}
+      </mat-option>
+    </mat-autocomplete>
+    <mat-error *ngIf="paciente.hasError('required')">
+      Campo obrigatório
+    </mat-error>
+  </mat-form-field>
+  <mat-select placeholder="Ponto-chave" name="keypoint" [(value)]="keypoint" [disabled]="paciente.hasError('required')" >
+    <mat-option *ngFor="let k of keypoints; let i = index" [value]="k">
+      {{i}} - {{k}}
+    </mat-option>
+  </mat-select>
+  <button mat-button [disabled]="paciente.hasError('required') || !keypoint" (click)="pesquisar()">Pesquisar</button>
+</form>
+
+<div *ngIf="showData && dataSource.length == 0">Não foram encontrados registros</div>
+
+<table mat-table [dataSource]="dataSource" *ngIf="showData && dataSource.length > 0">
+
+  <ng-container matColumnDef="idx">
+    <mat-header-cell *matHeaderCellDef> # </mat-header-cell>
+    <mat-cell *matCellDef="let element; let i = index"> {{i}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="fileName">
+    <mat-header-cell *matHeaderCellDef> Nome </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.fileName}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="date">
+    <mat-header-cell *matHeaderCellDef> Data </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{returnDate(element.date)}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="path">
+    <mat-header-cell *matHeaderCellDef> Caminho </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.path}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="exist">
+    <mat-header-cell *matHeaderCellDef> Processado </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.exist ? "Sim" : "Não"}} </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</table>
+
+<chart [style.display]="display" [type]="type" [data]="data" [options]="options" #chartData></chart>
+
+<div *ngIf="showData">
+
+  <mat-divider></mat-divider>
+
+  <h3>Análise</h3>
+
+  <form>
+    <mat-select placeholder="Selecionar video" name="videoA" [(value)]="videoA">
+      <mat-option *ngFor="let v of videos; let i = index" [value]="i">
+        {{i}} - {{v.fileName}}
+      </mat-option>
+    </mat-select>
+    <mat-select placeholder="Comparar com" name="videoB" [(value)]="videoB">
+      <mat-option *ngFor="let v of videos; let i = index" [value]="i">
+        {{i}} - {{v.fileName}}
+      </mat-option>
+    </mat-select>
+
+    <button mat-button (click)="analisar()">Analisar</button>
+
+    <label id="dynamicTimeWarpincDistance" *ngIf="displayDtw == 'block'">Distance: {{dynamicTimeWarpincDistance}}</label>
+  </form>
+
+  <chart [style.display]="displayDtw" [type]="type" [data]="dataDtw" [options]="options" #chartDtw></chart>
+
+
+</div>
