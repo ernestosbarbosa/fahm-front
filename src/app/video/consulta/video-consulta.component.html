@@ -5,7 +5,7 @@
 <form>
   <mat-form-field>
     <input type="text" placeholder="Paciente" matInput [formControl]="paciente" [matAutocomplete]="auto"
-      [errorStateMatcher]="matcher" (blur)="validateSelection($event.target.value)">
+      [errorStateMatcher]="matcher">
     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
       <mat-option *ngFor="let p of filteredPacientes | async" [value]="p">
         {{p.name}}
@@ -83,10 +83,16 @@
 
     <button mat-button (click)="analisar()">Analisar</button>
 
-    <label id="dynamicTimeWarpincDistance" *ngIf="displayDtw == 'block'">Distance: {{dynamicTimeWarpincDistance}}</label>
+
+    <label id="dynamicTimeWarpingDistance" *ngIf="displayDtw == 'block'">DTW Distance: {{dynamicTimeWarpingDistance}}</label>
+
   </form>
 
   <chart [style.display]="displayDtw" [type]="type" [data]="dataDtw" [options]="options" #chartDtw></chart>
+
+  <label id="dynamicTimeWarpingCroppedDistance" *ngIf="displayDtw == 'block'">DTW Cropped Distance: {{dynamicTimeWarpingCroppedDistance}} </label>
+  <label id="euclideanDistance" *ngIf="displayDtw == 'block'">Euclidean Distance: {{stringEuclideanDistance}}</label>
+  <chart [style.display]="displayDtwCropped" [type]="type" [data]="dataDtwCropped" [options]="options" #chartDtwCropped></chart>
 
 
 </div>

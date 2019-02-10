@@ -12,7 +12,12 @@ mat-select {
     margin-bottom: 10px;
 }
 
-#dynamicTimeWarpincDistance{
+#dynamicTimeWarpingDistance, #euclideanDistance{
     margin-left: 100px;
+    margin-right: 100px;
 }
-
+/*
+form {
+    margin-bottom: 100px
+}
+*/

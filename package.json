@@ -22,6 +22,7 @@
     "@angular/platform-browser-dynamic": "~7.2.0",
     "@angular/router": "~7.2.0",
     "angular2-chartjs": "^0.5.1",
+    "compute-euclidean-distance": "^1.0.0",
     "core-js": "^2.5.4",
     "dynamic-time-warping": "^1.0.0",
     "hammerjs": "^2.0.8",

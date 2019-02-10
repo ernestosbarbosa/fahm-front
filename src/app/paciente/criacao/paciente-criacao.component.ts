@@ -32,7 +32,7 @@ export class PacienteCriacaoComponent implements OnInit {
     this.loading = true;
     this.ps.criarPaciente(this.nomePacienteFormControl.value).subscribe(data => {
       alert('sucesso');
-      this.rs.navigate(['/paciente/consultar']);
+      this.rs.navigate(['/video/upload']);
     }, err => {
       alert('erro request');
       this.loading = false;

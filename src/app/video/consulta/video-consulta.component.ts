@@ -12,6 +12,7 @@ import { Quadro } from 'src/app/common/quadro';
 import { Pessoa } from 'src/app/common/pessoa';
 import { ChartComponent } from 'angular2-chartjs';
 import * as dtw from 'dynamic-time-warping'
+import * as euclidean from 'compute-euclidean-distance'
 import { keypointsBody25 } from 'src/app/constants/keypoints';
 
 @Component({
@@ -52,6 +53,7 @@ export class VideoConsultaComponent implements OnInit {
 
   @ViewChild('chartData') chartComponent: ChartComponent;
   @ViewChild('chartDtw') chartComponentDtw: ChartComponent;
+  @ViewChild('chartDtwCropped') chartComponentDtwCropped: ChartComponent;
 
   type = 'line';
   data;
@@ -82,8 +84,13 @@ export class VideoConsultaComponent implements OnInit {
       );
   }
 
-  private _filter(value: Paciente): Paciente[] {
-    const filterValue = value && value.name ? value.name.toLowerCase() : "";
+  private _filter(value: any): Paciente[] {
+    let filterValue;
+    if(typeof value === "string"){
+      filterValue = value.toLowerCase();
+    } else {
+      filterValue = value && value.name ? value.name.toLowerCase() : "";
+    }
     return this.pacientes.filter(p => p.name.toLowerCase().includes(filterValue));
   }
 
@@ -91,12 +98,13 @@ export class VideoConsultaComponent implements OnInit {
     return paciente ? paciente.name : undefined;
   }
 
-  validateSelection(value) {
-    let filtered = this.pacientes.filter(p => p.name.toLowerCase().includes(value))
-    if (!filtered || filtered.length > 0 && filtered[0].name != value) {
-      this.paciente.setValue(undefined);
-    }
-  }
+  // validateSelection(value) {
+  //   let filtered = this.pacientes.filter(p => p.name.toLowerCase().includes(value))
+  //   if (!filtered || filtered.length > 0 && filtered[0].name != value) {
+  //     this.paciente.setValue(undefined);
+  //   }
+  // }
+
   returnDate(date){
     return new Date(date).toLocaleDateString();
   }
@@ -191,7 +199,8 @@ export class VideoConsultaComponent implements OnInit {
       //exemplo didatico
       // datasets: [
       //   { label: `Curva A`, data: [0,1,2,3,4,5,6,7], borderColor: this.getRandomColor() },
-      //   { label: `Curva B`, data: [0,1,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,6,7], borderColor: this.getRandomColor() }
+      //   // { label: `Curva B`, data: [0,1,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,6,7], borderColor: this.getRandomColor() }
+      //   { label: `Curva B`, data: [2,3,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,7,7,8,9], borderColor: this.getRandomColor() }
       // ],
       // labels: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
     };
@@ -220,16 +229,49 @@ export class VideoConsultaComponent implements OnInit {
       alert("Devem ser selecionados dois videos")
       return;
     }
+    this.getEuclideanDistance(this.videoA, this.videoB);
     this.getDynamicTimeWarpingDistance(this.videoA, this.videoB);
   }
 
 
-  dynamicTimeWarpinc;
-  dynamicTimeWarpincDistance;
-  dynamicTimeWarpincPath;
-  displayDtw = "none";
-  dataDtw;
+  euclideanDistance;
+  stringEuclideanDistance;
 
+  dynamicTimeWarping;
+  dynamicTimeWarpingDistance;
+  dynamicTimeWarpingPath;
+  dynamicTimeWarpingCropped;
+  dynamicTimeWarpingCroppedDistance;
+  dynamicTimeWarpingCroppedPath;
+  displayDtw = "none";
+  displayDtwCropped = "none";
+  dataDtw;
+  dataDtwCropped;
+
+  getEuclideanDistance(a: number, b: number) {
+    let ser1 = this.data.datasets[a].data;
+    let ser2 = this.data.datasets[b].data;
+
+    // let ser1 = [0,1,2,3,4,5,6,7];
+    // // let ser2 = [0,1,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,6,7];
+    // let ser2 = [2,3,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,7,7,8,9];
+
+    let differenceLength = Math.abs(ser1.length - ser2.length);
+    console.log(ser1.length)
+    console.log(ser2.length)
+    console.log(differenceLength)
+    if(ser1.length > ser2.length){
+      ser1 = ser1.slice(0, ser1.length - differenceLength)
+    } else if(ser1.length < ser2.length){
+      ser2 = ser2.slice(0, ser2.length - differenceLength)
+    }
+
+    console.log(ser1)
+    console.log(ser2)
+    this.euclideanDistance = euclidean(ser1, ser2);
+    this.stringEuclideanDistance = `${this.euclideanDistance}`.replace(".", ",");
+    console.log(this.euclideanDistance)
+  }
 
 
   /* Dynamic Time Warping */
@@ -242,34 +284,64 @@ export class VideoConsultaComponent implements OnInit {
     let ser1 = this.data.datasets[a].data;
     let ser2 = this.data.datasets[b].data;
 
+    let ser1Cropped = ser1;
+    let ser2Cropped = ser2;
+
+    let differenceLength = Math.abs(ser1.length - ser2.length);
+    if(ser1.length > ser2.length){
+      ser1Cropped = ser1.slice(0, ser1.length - differenceLength)
+    } else if(ser1.length < ser2.length){
+      ser2Cropped = ser2.slice(0, ser2.length - differenceLength)
+    }
+
+
     // exemplo didatico
     // let ser1 = [0,1,2,3,4,5,6,7];
-    // let ser2 = [0,1,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,6,7];
+    // // let ser2 = [0,1,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,5,5,6,7];
+    // let ser2 = [2,3,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,7,7,8,9];
 
-    this.dynamicTimeWarpinc = new dtw(ser1, ser2, this.distFunc);
-    this.dynamicTimeWarpincDistance = this.dynamicTimeWarpinc.getDistance();
-    this.dynamicTimeWarpincPath = this.dynamicTimeWarpinc.getPath();
+    this.dynamicTimeWarping = new dtw(ser1, ser2, this.distFunc);
+    this.dynamicTimeWarpingDistance = this.dynamicTimeWarping.getDistance();
+    this.dynamicTimeWarpingPath = this.dynamicTimeWarping.getPath();
 
-    let size = this.dynamicTimeWarpincPath.length;
+    let size = this.dynamicTimeWarpingPath.length;
     let labels = Array.apply(null, { length: size }).map(Number.call, Number)
 
-    let dtwPathData = this.getDtwPathData(this.dynamicTimeWarpincPath)
+    // let dtwPathData = this.getDtwPathData(this.dynamicTimeWarpingPath)
 
     this.dataDtw = {
       datasets: [
-        { label: `DTW Path`, data: dtwPathData, borderColor: this.getRandomColor() }
+        { label: `Analise ${a}`, data: ser1, borderColor: this.getRandomColor() },
+        { label: `Analise ${b}`, data: ser2, borderColor: this.getRandomColor() }
       ],
       labels: labels
+    }
+
+    this.dynamicTimeWarpingCropped = new dtw(ser1Cropped, ser2Cropped, this.distFunc);
+    this.dynamicTimeWarpingCroppedDistance = this.dynamicTimeWarpingCropped.getDistance();
+    this.dynamicTimeWarpingCroppedPath = this.dynamicTimeWarpingCropped.getPath();
+
+    let sizeCropped = this.dynamicTimeWarpingCroppedPath.length;
+    let labelsCropped = Array.apply(null, { length: sizeCropped }).map(Number.call, Number)
+
+    // let dtwCroppedPathData = this.getDtwPathData(this.dynamicTimeWarpingCroppedPath)
+
+    this.dataDtwCropped = {
+      datasets: [
+        { label: `Analise ${a}`, data: ser1Cropped, borderColor: this.getRandomColor() },
+        { label: `Analise ${b}`, data: ser2Cropped, borderColor: this.getRandomColor() }
+      ],
+      labels: labelsCropped
     }
 
     this.chartComponentDtw.chart.update();
     this.chartComponentDtw.chart.canvas.parentNode.style.height = '300px';
 
+    this.chartComponentDtwCropped.chart.update();
+    this.chartComponentDtwCropped.chart.canvas.parentNode.style.height = '300px';
+
     this.displayDtw = "block";
-
-    console.log(this.dynamicTimeWarpinc.getDistance())
-    console.log(this.dynamicTimeWarpinc.getPath())
-
+    this.displayDtwCropped = "block";
   }
 
   getDtwPathData(dtwPath: any[]){
